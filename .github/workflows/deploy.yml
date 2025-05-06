@@ -1,0 +1,31 @@
+name: Build and Deploy Docker to Railway
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest .
+
+      - name: Push image to DockerHub
+        run: docker push ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway from Docker
+        run: railway deployment create --image ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

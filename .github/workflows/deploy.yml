@@ -19,14 +19,13 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest .
 
-      - name: Push image to DockerHub
+      - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
 
-      - name: Deploy to Railway from Docker
-        run: |
-          railway login --token ${{ secrets.RAILWAY_TOKEN }}
-          railway link  # Conecta tu proyecto con Railway
-          railway redeploy  # Esto ejecutará un redeploy del servicio
+      - name: Redeploy Railway project
+        run: railway redeploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

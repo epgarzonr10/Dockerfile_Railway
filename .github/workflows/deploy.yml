@@ -26,6 +26,7 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway from Docker
-        run: railway deploy --image ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway link  # Conecta tu proyecto con Railway
+          railway redeploy  # Esto ejecutará un redeploy del servicio

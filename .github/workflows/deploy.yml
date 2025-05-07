@@ -1,31 +1,28 @@
-name: Build and Deploy Docker to Railway
+name: Deploy to Railway
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]  # o la rama que uses para producción
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Login to DockerHub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest .
+    - name: Pull Docker image from Docker Hub
+      run: docker pull epgarzonr/hola-mundo:latest
 
-      - name: Push image to DockerHub
-        run: docker push ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
+    - name: Deploy to Railway
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      run: |
+        npm install -g railway
+        railway login --token $RAILWAY_TOKEN
+        railway up --service DockerfileHello
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy to Railway from Docker
-        run: railway deploy --image ${{ secrets.DOCKERHUB_USER }}/hola-mundo:latest
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
